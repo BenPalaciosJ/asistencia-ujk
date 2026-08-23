@@ -4,63 +4,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Asistencia - UJK</title>
-    <!-- Librería para generar el QR dinámicamente -->
+    <!-- Librería para generar el código QR dinámicamente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #0f172a; color: #f8fafc;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
         }
-        .container { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5rem; max-width: 1200px; padding: 2rem; }
-        .info-section { display: flex; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-        h1 { font-size: 2.2rem; font-weight: 400; color: #94a3b8; letter-spacing: -0.025em; line-height: 1.2; }
-        .subtitle { font-size: 1.2rem; color: #64748b; margin-top: 0.3rem; }
-        .pin-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-        .pin-label { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; font-weight: 600; }
-        .pin-code { font-size: 8rem; font-weight: 800; letter-spacing: 0.05em; color: #38bdf8; line-height: 1; }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 5rem;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: #94a3b8;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1.2rem; 
+            color: #64748b;
+            margin-top: 0.3rem;
+        }
+
+        .date-display {
+            font-size: 0.95rem;
+            color: #38bdf8;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .pin-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .pin-label {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .pin-code {
+            font-size: 7rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #38bdf8;
+            line-height: 1;
+        }
+
+        /* Estilo dinámico cuando no hay PIN asignado */
+        .pin-code.no-pin {
+            font-size: 2rem;
+            color: #f43f5e;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
         .qr-section {
-            background: #ffffff; padding: 1.5rem; border-radius: 1.5rem;
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
             box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-            display: flex; flex-direction: column; align-items: center; gap: 1rem;
-            text-decoration: none; transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: transform 0.2s ease;
         }
-        .qr-section:hover { transform: scale(1.02); }
-        #qrcode canvas, #qrcode img { display: block; border-radius: 0.5rem; }
-        .qr-hint { font-size: 0.85rem; color: #334155; font-weight: 600; text-align: center; }
-        footer { position: absolute; bottom: 1.5rem; font-size: 0.9rem; color: #475569; }
+
+        .qr-section:hover {
+            transform: scale(1.02);
+        }
+
+        #qrcode canvas, #qrcode img {
+            display: block;
+            border-radius: 0.5rem;
+        }
+
+        .qr-hint {
+            font-size: 0.85rem;
+            color: #334155;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #475569;
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
+        <!-- Sección de Información y PIN -->
         <div class="info-section">
             <div>
                 <h1>Registro de Asistencias UJK</h1>
                 <div class="subtitle">Educación Continua</div>
+                <div id="date-text" class="date-display">Cargando fecha...</div>
             </div>
+            
             <div class="pin-container">
                 <span class="pin-label">PIN de la Clase</span>
-                <!-- CAMBIA EL PIN AQUÍ DIRECTAMENTE ANTES DE CADA CLASE -->
-                <div class="pin-code" id="pin-display">5598</div>
+                <div class="pin-code" id="pin-display">Cargando...</div>
             </div>
         </div>
 
+        <!-- Sección del Código QR dinámico con enlace -->
         <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u" target="_blank" class="qr-section">
             <div id="qrcode"></div>
             <span class="qr-hint">Escanea para registrar asistencia</span>
         </a>
     </div>
 
-    <footer>UJK • Sistema de Control de Asistencias</footer>
+    <footer>
+        UJK • Sistema de Control de Asistencias
+    </footer>
 
     <script>
-        // Generar QR automáticamente
+        // 1. Generar el código QR de Microsoft Forms
         new QRCode(document.getElementById("qrcode"), {
             text: "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u",
-            width: 240, height: 240, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H
+            width: 240,
+            height: 240,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
         });
+
+        // 2. Base de datos de PINs integrada directamente (adiós a problemas de carga externa)
+        const calendarioPines = {
+            "2026-08-19": "5598",
+            "2026-08-22": "5105",
+            "2026-08-29": "8200",
+            "2026-09-05": "8006",
+            "2026-09-12": "8370",
+            "2026-09-19": "9672",
+            "2026-09-26": "2458",
+            "2026-10-03": "3660",
+            "2026-10-10": "4846",
+            "2026-10-17": "8122",
+            "2026-10-24": "8554",
+            "2026-10-31": "6652",
+            "2026-11-07": "2425",
+            "2026-11-14": "9134",
+            "2026-11-21": "6912",
+            "2026-11-28": "6808",
+            "2026-12-05": "1228",
+            "2026-12-12": "5529",
+            "2026-12-19": "2925",
+            "2026-12-26": "0486",
+            "2027-01-02": "7744",
+            "2027-01-09": "3313",
+            "2027-01-16": "3920",
+            "2027-01-23": "3817",
+            "2027-01-30": "5612",
+            "2027-02-06": "3825",
+            "2027-02-13": "5570",
+            "2027-02-20": "6323",
+            "2027-02-27": "4876",
+            "2027-03-06": "9221",
+            "2027-03-13": "0612",
+            "2027-03-20": "4689",
+            "2027-03-27": "6459",
+            "2027-04-03": "6450",
+            "2027-04-10": "2621",
+            "2027-04-17": "0805",
+            "2027-04-24": "0447",
+            "2027-05-01": "1420",
+            "2027-05-08": "6596",
+            "2027-05-15": "6931",
+            "2027-05-22": "5483",
+            "2027-05-29": "7990",
+            "2027-06-05": "8859",
+            "2027-06-12": "7648",
+            "2027-06-19": "9674",
+            "2027-06-26": "6486",
+            "2027-07-03": "9891",
+            "2027-07-10": "5226",
+            "2027-07-17": "2132",
+            "2027-07-24": "7671",
+            "2027-07-31": "8692",
+            "2027-08-07": "3427",
+            "2027-08-14": "6906",
+            "2027-08-21": "0943",
+            "2027-08-28": "2607",
+            "2027-09-04": "5328",
+            "2027-09-11": "4067",
+            "2027-09-18": "0100",
+            "2027-09-25": "8200",
+            "2027-10-02": "4071",
+            "2027-10-09": "1788",
+            "2027-10-16": "3531",
+            "2027-10-23": "0659",
+            "2027-10-30": "2348",
+            "2027-11-06": "6660",
+            "2027-11-13": "4853",
+            "2027-11-20": "9032",
+            "2027-11-27": "1616",
+            "2027-12-04": "0065",
+            "2027-12-11": "7132",
+            "2027-12-18": "6425",
+            "2027-12-25": "3639",
+            "2028-01-01": "4279",
+            "2028-01-08": "9099",
+            "2028-01-15": "6737",
+            "2028-01-22": "0328",
+            "2028-01-29": "3716",
+            "2028-02-05": "7618",
+            "2028-02-12": "3017",
+            "2028-02-19": "5068",
+            "2028-02-26": "5066",
+            "2028-03-04": "3617",
+            "2028-03-11": "9486",
+            "2028-03-18": "6959",
+            "2028-03-25": "6818",
+            "2028-04-01": "7268",
+            "2028-04-08": "2613",
+            "2028-04-15": "4522",
+            "2028-04-22": "9245",
+            "2028-04-29": "2921",
+            "2028-05-06": "9992",
+            "2028-05-13": "9627",
+            "2028-05-20": "6787",
+            "2028-05-27": "7713",
+            "2028-06-03": "5824",
+            "2028-06-10": "4003",
+            "2028-06-17": "4374",
+            "2028-06-24": "8797",
+            "2028-07-01": "0897",
+            "2028-07-08": "5953",
+            "2028-07-15": "0131",
+            "2028-07-22": "8078",
+            "2028-07-29": "8558",
+            "2028-08-05": "2183",
+            "2028-08-12": "4150",
+            "2028-08-19": "4671",
+            "2028-08-26": "7321",
+            "2028-09-02": "9417",
+            "2028-09-09": "9588",
+            "2028-09-16": "2473",
+            "2028-09-23": "3511",
+            "2028-09-30": "5921",
+            "2028-10-07": "9897",
+            "2028-10-14": "3333",
+            "2028-10-21": "4725",
+            "2028-10-28": "0949",
+            "2028-11-04": "9732",
+            "2028-11-11": "7692",
+            "2028-11-18": "5507",
+            "2028-11-25": "6608",
+            "2028-12-02": "5737",
+            "2028-12-09": "0170",
+            "2028-12-16": "8034",
+            "2028-12-30": "8057"
+        };
+
+        function verificarPinPorFecha() {
+            // Obtener fecha actual en formato YYYY-MM-DD usando la hora local exacta
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            const fechaHoyStr = `${anio}-${mes}-${dia}`;
+
+            // Mostrar la fecha amigable en pantalla
+            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date-text').innerText = hoy.toLocaleDateString('es-ES', opcionesFecha);
+
+            const pinDisplay = document.getElementById('pin-display');
+
+            // Validar si la fecha local de hoy existe en el objeto
+            if (calendarioPines.hasOwnProperty(fechaHoyStr)) {
+                pinDisplay.className = "pin-code"; 
+                pinDisplay.innerText = calendarioPines[fechaHoyStr];
+            } else {
+                pinDisplay.className = "pin-code no-pin"; 
+                pinDisplay.innerText = "PIN no asignado aún para esta fecha.";
+            }
+        }
+
+        // Ejecutar al cargar la página
+        verificarPinPorFecha();
     </script>
+
 </body>
 </html>
