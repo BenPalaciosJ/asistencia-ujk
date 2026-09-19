@@ -1,200 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Asistencia - UJK</title>
-    <!-- Librería para generar el código QR dinámicamente -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1.5rem;
-            overflow-x: hidden;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 4rem;
-            width: 100%;
-            max-width: 1100px;
-        }
-
-        .info-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1.2rem;
-            flex: 1;
-        }
-
-        h1 {
-            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-            font-weight: 400;
-            color: #94a3b8;
-            letter-spacing: -0.025em;
-            line-height: 1.2;
-        }
-
-        .subtitle {
-            font-size: clamp(1rem, 2vw, 1.2rem); 
-            color: #64748b;
-            margin-top: 0.2rem;
-        }
-
-        .date-display {
-            font-size: clamp(0.9rem, 1.8vw, 1rem);
-            color: #38bdf8;
-            text-transform: capitalize;
-            font-weight: 500;
-        }
-
-        .pin-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-            margin-top: 0.5rem;
-        }
-
-        .pin-label {
-            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        /* El PIN usa tamaño fluido para reducirse automáticamente en celulares */
-        .pin-code {
-            font-size: clamp(4.5rem, 12vw, 8rem);
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            color: #38bdf8;
-            line-height: 1;
-        }
-
-        /* Estilo dinámico cuando no hay PIN asignado */
-        .pin-code.no-pin {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            color: #f43f5e;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-
-        .qr-section {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            text-decoration: none;
-            transition: transform 0.2s ease;
-            flex-shrink: 0;
-        }
-
-        .qr-section:hover {
-            transform: scale(1.02);
-        }
-
-        #qrcode canvas, #qrcode img {
-            display: block;
-            border-radius: 0.5rem;
-            width: 220px !important;
-            height: 220px !important;
-        }
-
-        .qr-hint {
-            font-size: 0.85rem;
-            color: #334155;
-            font-weight: 600;
-            text-align: center;
-            letter-spacing: 0.02em;
-        }
-
-        footer {
-            margin-top: 3rem;
-            font-size: 0.85rem;
-            color: #475569;
-            text-align: center;
-        }
-
-        /* Media Query: Se activa en teléfonos y tabletas verticalmente */
-        @media (max-width: 850px) {
-            body {
-                justify-content: flex-start;
-                padding: 2rem 1rem;
-            }
-
-            .container {
-                flex-direction: column;
-                text-align: center;
-                gap: 2.5rem;
-            }
-
-            .info-section {
-                align-items: center;
-                width: 100%;
-            }
-
-            .pin-container {
-                align-items: center;
-            }
-
-            footer {
-                margin-top: 2rem;
-                position: relative;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <!-- Sección de Información y PIN -->
-        <div class="info-section">
-            <div>
-                <h1>Registro de Asistencias UJK</h1>
-                <div class="subtitle">Educación Continua</div>
-                <div id="date-text" class="date-display">Cargando fecha...</div>
-            </div>
-            
-            <div class="pin-container">
-                <span class="pin-label">PIN de la Clase</span>
-                <div class="pin-code" id="pin-display">Cargando...</div>
-            </div>
-        </div>
-
-        <!-- Sección del Código QR dinámico con enlace -->
-        <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u" target="_blank" class="qr-section">
-            <div id="qrcode"></div>
-            <span class="qr-hint">Escanea para registrar asistencia</span>
-        </a>
-    </div>
-
-    <footer>
-        UJK • Sistema de Control de Asistencias
-    </footer>
-
-    <script>
+<script>
         // 1. Generar el código QR de Microsoft Forms
         new QRCode(document.getElementById("qrcode"), {
             text: "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u",
@@ -222,8 +26,8 @@
                 const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 dateText.innerText = hoy.toLocaleDateString('es-ES', opcionesFecha);
 
-                // Petición al archivo pin.json
-                const response = await fetch('./pin.json?v=' + new Date().getTime());
+                // Petición al archivo pin.json con un bloqueador de caché más agresivo
+                const response = await fetch('pin.json?nocache=' + new Date().getTime());
                 
                 if (!response.ok) {
                     throw new Error("No se pudo cargar el archivo pin.json");
@@ -231,13 +35,15 @@
 
                 const calendarioPines = await response.json();
 
-                // Validar si la fecha local de hoy existe en el JSON cargado
-                if (calendarioPines.hasOwnProperty(fechaHoyStr)) {
+                // Validación directa accediendo al valor del JSON (Más robusto)
+                if (calendarioPines[fechaHoyStr]) {
                     pinDisplay.className = "pin-code"; 
                     pinDisplay.innerText = calendarioPines[fechaHoyStr];
                 } else {
+                    // Muestra textualmente la fecha que el sistema calculó para depurar fácil
                     pinDisplay.className = "pin-code no-pin"; 
-                    pinDisplay.innerText = "PIN no asignado aún para esta fecha.";
+                    pinDisplay.innerText = `No hay registros para la fecha: ${fechaHoyStr}`;
+                    console.log("Fechas detectadas en el JSON:", Object.keys(calendarioPines));
                 }
 
             } catch (error) {
@@ -250,6 +56,3 @@
         // Ejecutar al cargar la página
         verificarPinPorFecha();
     </script>
-
-</body>
-</html>
