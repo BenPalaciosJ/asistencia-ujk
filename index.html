@@ -3,121 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Asistencia - Certificación</title>
-    <!-- Favicon con el logotipo institucional -->
-    <link rel="icon" type="image/png" href="images.png">
-    <!-- Tailwind CSS para un diseño limpio y moderno -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Librería para generar códigos QR dinámicamente -->
+    <title>Registro de Asistencia - UJK</title>
+    <!-- Librería para generar el código QR dinámicamente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 4rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.2rem;
+            flex: 1;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            font-weight: 400;
+            color: #94a3b8;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem); 
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+
+        .date-display {
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            color: #38bdf8;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .pin-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+        }
+
+        .pin-label {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* El PIN usa tamaño fluido para reducirse automáticamente en celulares */
+        .pin-code {
+            font-size: clamp(4.5rem, 12vw, 8rem);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #38bdf8;
+            line-height: 1;
+        }
+
+        /* Estilo dinámico cuando no hay PIN asignado */
+        .pin-code.no-pin {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: #f43f5e;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .qr-section {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .qr-section:hover {
+            transform: scale(1.02);
+        }
+
+        #qrcode canvas, #qrcode img {
+            display: block;
+            border-radius: 0.5rem;
+            width: 220px !important;
+            height: 220px !important;
+        }
+
+        .qr-hint {
+            font-size: 0.85rem;
+            color: #334155;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+
+        footer {
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #475569;
+            text-align: center;
+        }
+
+        /* Media Query: Se activa en teléfonos y tabletas verticalmente */
+        @media (max-width: 850px) {
+            body {
+                justify-content: flex-start;
+                padding: 2rem 1rem;
+            }
+
+            .container {
+                flex-direction: column;
+                text-align: center;
+                gap: 2.5rem;
+            }
+
+            .info-section {
+                align-items: center;
+                width: 100%;
+            }
+
+            .pin-container {
+                align-items: center;
+            }
+
+            footer {
+                margin-top: 2rem;
+                position: relative;
+            }
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div class="max-w-xl w-full bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700 text-center">
-        
-        <!-- Logotipo institucional visualizado en la cabecera -->
-        <div class="flex justify-center mb-4">
-            <img src="images.png" alt="Logo UJK" class="w-16 h-16 rounded-xl object-cover shadow-md border border-slate-600">
-        </div>
-
-        <!-- Encabezado -->
-        <h1 class="text-3xl font-extrabold mb-1 text-indigo-400">Control de Asistencia</h1>
-        <p class="text-xs uppercase tracking-widest text-slate-400 mb-2 font-semibold">Educación Continua / Certificación</p>
-        <p id="fecha-actual" class="text-slate-300 text-sm mb-6"></p>
-
-        <!-- Contenedor Dinámico según la sesión de hoy -->
-        <div id="contenido-sesion">
-            <div class="animate-pulse flex flex-col items-center">
-                <div class="h-6 bg-slate-700 rounded w-3/4 mb-4"></div>
-                <div class="h-32 bg-slate-700 rounded w-32 mb-4"></div>
-                <div class="h-10 bg-slate-700 rounded w-1/2"></div>
+    <div class="container">
+        <!-- Sección de Información y PIN -->
+        <div class="info-section">
+            <div>
+                <h1>Registro de Asistencias UJK</h1>
+                <div class="subtitle">Educación Continua</div>
+                <div id="date-text" class="date-display">Cargando fecha...</div>
+            </div>
+            
+            <div class="pin-container">
+                <span class="pin-label">PIN de la Clase</span>
+                <div class="pin-code" id="pin-display">Cargando...</div>
             </div>
         </div>
 
+        <!-- Sección del Código QR dinámico con enlace -->
+        <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u" target="_blank" class="qr-section">
+            <div id="qrcode"></div>
+            <span class="qr-hint">Escanea para registrar asistencia</span>
+        </a>
     </div>
 
-    <!-- Script de lógica -->
+    <footer>
+        UJK • Sistema de Control de Asistencias
+    </footer>
+
     <script>
-        async function cargarAsistencia() {
-            const contenedor = document.getElementById('contenido-sesion');
-            const labelFecha = document.getElementById('fecha-actual');
-            
-            // Obtener fecha actual en formato local
-            const hoy = new Date();
-            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            labelFecha.textContent = hoy.toLocaleDateString('es-ES', opcionesFecha);
-            
-            // Formato YYYY-MM-DD para comparar con el JSON
-            const anio = hoy.getFullYear();
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoy.getDate()).padStart(2, '0');
-            const fechaHoyStr = `${anio}-${mes}-${dia}`;
+        // 1. Generar el código QR de Microsoft Forms
+        new QRCode(document.getElementById("qrcode"), {
+            text: "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUQVU2WExRWVlMQkY4SUhCOVdIWThONTVGQi4u",
+            width: 220,
+            height: 220,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // 2. Función para consultar el archivo pin.json externo
+        async function verificarPinPorFecha() {
+            const pinDisplay = document.getElementById('pin-display');
+            const dateText = document.getElementById('date-text');
 
             try {
-                // Cargar el archivo pin.json
-                const respuesta = await fetch('pin.json');
-                if (!respuesta.ok) throw new Error('No se pudo cargar el archivo pin.json');
+                // Obtener fecha actual en formato YYYY-MM-DD usando la hora local exacta
+                const hoy = new Date();
+                const anio = hoy.getFullYear();
+                const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoy.getDate()).padStart(2, '0');
+                const fechaHoyStr = `${anio}-${mes}-${dia}`;
+
+                // Mostrar la fecha amigable en pantalla
+                const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateText.innerText = hoy.toLocaleDateString('es-ES', opcionesFecha);
+
+                // Petición al archivo pin.json
+                const response = await fetch('./pin.json?v=' + new Date().getTime());
                 
-                const sesiones = await respuesta.json();
-
-                // Buscar si hay sesión programada para el día de hoy
-                const sesionHoy = sesiones.find(s => s.Fecha_Sesion === fechaHoyStr);
-
-                if (!sesionHoy) {
-                    contenedor.innerHTML = `
-                        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-300 p-6 rounded-xl">
-                            <h2 class="text-xl font-bold mb-2">Sin sesión programada para hoy</h2>
-                            <p class="text-sm">No hay registro de clases de certificación activas para esta fecha.</p>
-                        </div>
-                    `;
-                    return;
+                if (!response.ok) {
+                    throw new Error("No se pudo cargar el archivo pin.json");
                 }
 
-                // Si hay sesión, mostramos la información y generamos el QR
-                contenedor.innerHTML = `
-                    <div class="mb-6">
-                        <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-semibold rounded-full uppercase tracking-wider">${sesionHoy.Grupo}</span>
-                        <h2 class="text-2xl font-bold mt-2 text-white">${sesionHoy.Materia}</h2>
-                        <p class="text-slate-400 text-sm mt-1">Horario: ${sesionHoy.Hora_Inicio} - ${sesionHoy.Hora_Fin}</p>
-                    </div>
+                const calendarioPines = await response.json();
 
-                    <div class="bg-white p-6 rounded-xl inline-block shadow-lg mb-6">
-                        <div id="qrcode" class="flex justify-center"></div>
-                    </div>
-
-                    <div class="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
-                        <span class="text-xs uppercase tracking-widest text-slate-400 block font-semibold">PIN de la Sesión</span>
-                        <span class="text-4xl font-mono font-black text-emerald-400 tracking-widest mt-1 block">${sesionHoy.PIN}</span>
-                    </div>
-
-                    <p class="text-xs text-slate-400 mt-6">Escanea el código QR o ingresa a tu Microsoft Forms institucional para registrar tu asistencia usando este PIN.</p>
-                `;
-
-                // URL oficial del formulario proporcionada
-                const urlFormulario = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=GLuMkMtiv0qNgXNUIBnVib19QUgiNrVPvnvirf5lPohUMFNOQ1RIMkNSTkFRSEpEMjZJQ1IzTDlKRS4u"; 
-                
-                new QRCode(document.getElementById("qrcode"), {
-                    text: urlFormulario,
-                    width: 180,
-                    height: 180,
-                    colorDark: "#0f172a",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                // Validar si la fecha local de hoy existe en el JSON cargado
+                if (calendarioPines.hasOwnProperty(fechaHoyStr)) {
+                    pinDisplay.className = "pin-code"; 
+                    pinDisplay.innerText = calendarioPines[fechaHoyStr];
+                } else {
+                    pinDisplay.className = "pin-code no-pin"; 
+                    pinDisplay.innerText = "PIN no asignado aún para esta fecha.";
+                }
 
             } catch (error) {
-                console.error(error);
-                contenedor.innerHTML = `
-                    <div class="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-6 rounded-xl">
-                        <h2 class="text-xl font-bold mb-2">Error de sistema</h2>
-                        <p class="text-sm">No se pudo leer el archivo de configuración de PINs (` + error.message + `).</p>
-                    </div>
-                `;
+                console.error("Error:", error);
+                pinDisplay.className = "pin-code no-pin";
+                pinDisplay.innerText = "Error al leer el archivo de PINs.";
             }
         }
 
         // Ejecutar al cargar la página
-        cargarAsistencia();
+        verificarPinPorFecha();
     </script>
+
 </body>
 </html>
