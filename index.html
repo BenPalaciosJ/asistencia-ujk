@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Asistencia - Certificación</title>
-    <!-- Favicon con el logotipo institucional -->
-    <link rel="icon" type="image/png" href="images.png">
+    <!-- Favicon con el logotipo institucional corregido -->
+    <link rel="icon" type="image/png" href="ujk.png">
     <!-- Tailwind CSS para un diseño limpio y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Librería para generar códigos QR dinámicamente -->
@@ -15,9 +15,9 @@
 
     <div class="max-w-xl w-full bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700 text-center">
         
-        <!-- Logotipo institucional visualizado en la cabecera -->
+        <!-- Logotipo institucional visualizado en la cabecera (corregido) -->
         <div class="flex justify-center mb-4">
-            <img src="images.png" alt="Logo UJK" class="w-16 h-16 rounded-xl object-cover shadow-md border border-slate-600">
+            <img src="ujk.png" alt="Logo UJK" class="w-16 h-16 rounded-xl object-cover shadow-md border border-slate-600 bg-white">
         </div>
 
         <!-- Encabezado -->
@@ -36,7 +36,7 @@
 
     </div>
 
-    <!-- Script de lógica limpio y libre de errores de formato -->
+    <!-- Script de lógica -->
     <script>
         async function cargarAsistencia() {
             const contenedor = document.getElementById('contenido-sesion');
@@ -54,31 +54,30 @@
             const fechaHoyStr = `${anio}-${mes}-${dia}`;
 
             try {
-                // Cargar el archivo pin.json con prevencion de caché
+                // Cargar el archivo pin.json con bloqueador de caché
                 const respuesta = await fetch('pin.json?nocache=' + new Date().getTime());
                 if (!respuesta.ok) throw new Error('No se pudo cargar el archivo pin.json');
                 
                 const sesiones = await respuesta.json();
 
-                // Buscar si hay sesión programada para el día de hoy
-                const sesionHoy = sesiones.find(s => s.Fecha_Sesion === fechaHoyStr);
-
-                if (!sesionHoy) {
+                // Validación directa de diccionario (evita el error sesiones.find is not a function)
+                if (!sesiones[fechaHoyStr]) {
                     contenedor.innerHTML = `
                         <div class="bg-amber-500/10 border border-amber-500/30 text-amber-300 p-6 rounded-xl">
                             <h2 class="text-xl font-bold mb-2">Sin sesión programada para hoy</h2>
-                            <p class="text-sm">No hay registro de clases de certificación activas para la fecha: ${fechaHoyStr}.</p>
+                            <p class="text-sm">No hay registro de clases para la fecha: ${fechaHoyStr}.</p>
                         </div>
                     `;
                     return;
                 }
 
+                const pinOficial = sesiones[fechaHoyStr];
+
                 // Si hay sesión, mostramos la información y generamos el QR
                 contenedor.innerHTML = `
                     <div class="mb-6">
-                        <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-semibold rounded-full uppercase tracking-wider">${sesionHoy.Grupo}</span>
-                        <h2 class="text-2xl font-bold mt-2 text-white">${sesionHoy.Materia}</h2>
-                        <p class="text-slate-400 text-sm mt-1">Horario: ${sesionHoy.Hora_Inicio} - ${sesionHoy.Hora_Fin}</p>
+                        <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-semibold rounded-full uppercase tracking-wider">Sábados</span>
+                        <h2 class="text-2xl font-bold mt-2 text-white">Sesión Programada</h2>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl inline-block shadow-lg mb-6">
@@ -87,7 +86,7 @@
 
                     <div class="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
                         <span class="text-xs uppercase tracking-widest text-slate-400 block font-semibold">PIN de la Sesión</span>
-                        <span class="text-4xl font-mono font-black text-emerald-400 tracking-widest mt-1 block">${sesionHoy.PIN}</span>
+                        <span class="text-4xl font-mono font-black text-emerald-400 tracking-widest mt-1 block">${pinOficial}</span>
                     </div>
 
                     <p class="text-xs text-slate-400 mt-6">Escanea el código QR o ingresa a tu Microsoft Forms institucional para registrar tu asistencia usando este PIN.</p>
