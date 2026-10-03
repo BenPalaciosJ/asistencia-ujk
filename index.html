@@ -26,8 +26,8 @@
                 const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 dateText.innerText = hoy.toLocaleDateString('es-ES', opcionesFecha);
 
-                // Petición al archivo pin.json con un bloqueador de caché
-                const response = await fetch('./pin.json?nocache=' + new Date().getTime());
+                // Petición al archivo pin.json con un bloqueador de caché más agresivo
+                const response = await fetch('pin.json?nocache=' + new Date().getTime());
                 
                 if (!response.ok) {
                     throw new Error("No se pudo cargar el archivo pin.json");
@@ -35,13 +35,15 @@
 
                 const calendarioPines = await response.json();
 
-                // Validación directa accediendo al valor del JSON como un objeto
+                // Validación directa accediendo al valor del JSON (Más robusto)
                 if (calendarioPines[fechaHoyStr]) {
                     pinDisplay.className = "pin-code"; 
                     pinDisplay.innerText = calendarioPines[fechaHoyStr];
                 } else {
+                    // Muestra textualmente la fecha que el sistema calculó para depurar fácil
                     pinDisplay.className = "pin-code no-pin"; 
-                    pinDisplay.innerText = "PIN no asignado aún para esta fecha.";
+                    pinDisplay.innerText = `No hay registros para la fecha: ${fechaHoyStr}`;
+                    console.log("Fechas detectadas en el JSON:", Object.keys(calendarioPines));
                 }
 
             } catch (error) {
